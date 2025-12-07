@@ -18,7 +18,7 @@ from nltk.corpus import stopwords
 stop_words = stopwords.words('english')
 
 # Токен
-TOKEN = "8275828988:AAEvoC1vldPuxBqy5As39J5Fo43YSOzScok"
+TOKEN = "8275828988:AAEvoC1vldPuxBqy5As39J5Fo43YS0zScok"
 bot = telebot.TeleBot(TOKEN)
 
 # Загрузка модели
