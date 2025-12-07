@@ -18,7 +18,13 @@ from nltk.corpus import stopwords
 stop_words = stopwords.words('english')
 
 # Токен
-TOKEN = "8275828988:AAEvoC1vldPuxBqy5As39J5Fo43YS0zScok"
+# Читаем токен из переменной окружения (безопасно!)
+TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    print("ОШИБКА: Не найден BOT_TOKEN! Добавь его в Environment Variables на Render.")
+    exit(1)
+
 bot = telebot.TeleBot(TOKEN)
 
 # Загрузка модели
