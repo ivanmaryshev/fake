@@ -5,64 +5,52 @@ from tensorflow.keras.preprocessing.text import one_hot
 from keras.utils import pad_sequences
 import re
 import nltk
-from nltk.corpus import stopwords
+import os
 
-# === ЗАГРУЗКА РЕСУРСОВ ===
-nltk.download('stopwords', quiet=True)
+# Скачиваем стоп-слова один раз
+if not os.path.exists('/tmp/nltk_data'):
+    nltk.download('stopwords', download_dir='/tmp/nltk_data', quiet=True)
+    nltk.data.path.append('/tmp/nltk_data')
+else:
+    nltk.data.path.append('/tmp/nltk_data')
+
+from nltk.corpus import stopwords
 stop_words = stopwords.words('english')
 
-# Твой токен
+# Токен
 TOKEN = "8275828988:AAEvoC1vldPuxBqy5As39J5Fo43YSOzScok"
 bot = telebot.TeleBot(TOKEN)
 
-# Загружаем модель
+# Загрузка модели
 model = load_model("fake_news_tg_bot_ready/fake_news_lstm_final.keras")
 
-# Параметры (из твоего Colab)
 VOCAB_SIZE = 5000
-MAX_LENGTH = 40          # ← у тебя в коде max_length = 40
+MAX_LENGTH = 40
 THRESHOLD = 0.4
 TEXT_CLEANING_RE = r"\b0\S*|\b[^A-Za-z0-9]+"
 
-
-# === ПЕРЕНОС ТВОЕЙ ПРЕДОБРАБОТКИ ПРЯМО В БОТ ===
 def preprocess_text(text):
-    # 1. Очистка (точно как у тебя в Colab)
     text = re.sub(TEXT_CLEANING_RE, " ", str(text).lower().strip())
-    # 2. Убираем стоп-слова
     text = " ".join([word for word in text.split() if word not in stop_words])
-    # 3. One-hot encoding
     encoded = one_hot(text, VOCAB_SIZE)
-    # 4. Padding
     padded = pad_sequences([encoded], maxlen=MAX_LENGTH, padding='pre')
     return padded
 
-
-# === ОБРАБОТЧИКИ ===
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Привет! Отправь заголовок новости — я скажу, фейк или правда.")
-
+    bot.reply_to(message, "Привет! Кидай заголовок новости — скажу, фейк или правда.")
 
 @bot.message_handler(func=lambda m: True)
 def check_news(message):
     try:
         X = preprocess_text(message.text)
         pred = model.predict(X, verbose=0)[0][0]
-
-        if pred > THRESHOLD:
-            label = "ФЕЙК"
-            confidence = pred
-        else:
-            label = "ПРАВДА"
-            confidence = 1 - pred
-
+        label = "ФЕЙК" if pred > THRESHOLD else "ПРАВДА"
+        confidence = pred if pred > 0.5 else 1 - pred
         bot.reply_to(message, f"{label}\nУверенность: {confidence:.1%}")
-
     except Exception as e:
-        print("Ошибка:", e)  # видно в логах Render
-        bot.reply_to(message, "Не смог обработать. Попробуй другой текст.")
-
+        print("Ошибка:", e)
+        bot.reply_to(message, "Не понял текст. Попробуй короче.")
 
 print("Бот запущен и работает 24/7!")
 bot.infinity_polling()
