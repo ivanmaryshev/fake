@@ -6,6 +6,8 @@ from keras.utils import pad_sequences
 import re
 import nltk
 import os
+from dotenv import load_dotenv
+from nltk.corpus import stopwords
 
 if not os.path.exists('/tmp/nltk_data'):
     nltk.download('stopwords', download_dir='/tmp/nltk_data', quiet=True)
@@ -13,13 +15,15 @@ if not os.path.exists('/tmp/nltk_data'):
 else:
     nltk.data.path.append('/tmp/nltk_data')
 
-from nltk.corpus import stopwords
 stop_words = stopwords.words('english')
+
+
+load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
-    print("ОШИБКА: Не найден BOT_TOKEN!")
+    print("ОШИБКА: Не найден BOT_TOKEN! Проверь .env файл.")
     exit(1)
 
 bot = telebot.TeleBot(TOKEN)
