@@ -7,7 +7,6 @@ import re
 import nltk
 import os
 
-# Скачиваем стоп-слова один раз
 if not os.path.exists('/tmp/nltk_data'):
     nltk.download('stopwords', download_dir='/tmp/nltk_data', quiet=True)
     nltk.data.path.append('/tmp/nltk_data')
@@ -17,8 +16,6 @@ else:
 from nltk.corpus import stopwords
 stop_words = stopwords.words('english')
 
-# Токен
-# Читаем токен из переменной окружения (безопасно!)
 TOKEN = "8275828988:AAEvoC1vldPuxBqy5As39J5Fo43YS0zScok"
 
 bot = telebot.TeleBot(TOKEN)
@@ -40,7 +37,7 @@ def preprocess_text(text):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Привет! Кидай заголовок новости — скажу, фейк или правда.")
+    bot.reply_to(message, "Привет! Я могу по заголовку понять новость фейк или правда")
 
 @bot.message_handler(func=lambda m: True)
 def check_news(message):
@@ -54,5 +51,5 @@ def check_news(message):
         print("Ошибка:", e)
         bot.reply_to(message, "Не понял текст. Попробуй короче.")
 
-print("Бот запущен и работает 24/7!")
+print("Бот запущен и работает")
 bot.infinity_polling()
